@@ -1,12 +1,16 @@
 from blog import db, login_manager
-from datetime import datetime
+from datetime import datetime,date
 from flask_login import UserMixin
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 class User(db.Model, UserMixin):
+    # __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -19,6 +23,8 @@ class User(db.Model, UserMixin):
 
 
 class Post(db.Model):
+    # __tablename__ = 'posts'
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -27,3 +33,26 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
+
+class Plan(db.Model):
+    # __tablename__ = 'plans'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    date_start = db.Column(db.Date, nullable=False, default=date.today())
+    date_end = db.Column(db.Date, nullable=False, default=date.today().replace(year=date.today().year+1))
+    content = db.Column(db.Text, nullable=False)
+    candidates = db.relationship('Candidate', backref='plan', lazy=True)
+
+
+
+class Candidate(db.Model):
+    # __tablename__ = 'candidates'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(100), nullable=False)
+    position = db.Column(db.String(100), nullable=False)
+    plan_id = db.Column(db.Integer, db.ForeignKey('plan.id'), nullable=False)
